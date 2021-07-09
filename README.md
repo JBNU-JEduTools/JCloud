@@ -4,4 +4,4 @@
 - <a href="http://jcloud.jbnu.ac.kr" onclick="return ! window.open(this.href);">login page</a>
 - <a href="https://jcloud-devops.github.io/" onclick="return ! window.open(this.href);">help page</a>
 
-
+[Go to this page](http://somelink.com/?target=_blank)
