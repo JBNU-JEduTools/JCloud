@@ -65,12 +65,12 @@ Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 
          $vi local.conf
          ```
          **local.conf**
-         > [[local|localrc]]
-         > HOST_IP=<IP> # hostname -I 를 통해 얻은 IP
-         > ADMIN_PASSWORD=0000
-         > RABBIT_PASSWORD=0000
-         > SERVICE_PASSWORD=0000
-         > DATABASE_PASSWORD=0000
+         > [[local|localrc]]  
+         > HOST_IP=<IP> # hostname -I 를 통해 얻은 IP  
+         > ADMIN_PASSWORD=0000  
+         > RABBIT_PASSWORD=0000  
+         > SERVICE_PASSWORD=0000  
+         > DATABASE_PASSWORD=0000  
     9. pip 수정
          ```
          $vi inc/python
