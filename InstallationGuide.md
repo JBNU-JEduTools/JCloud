@@ -29,9 +29,12 @@ Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 
     이미지 및 유동 IP 설정
     
 2. Openstack 설치
-    1. Prerequirements
-    2. 유저 생성
-    3. Devstack 다운로드
-    4. 노드 설정 - Controller Node
-    5. pip 수정
-    6. 설치시작
+    1. Prerequirements 설치
+         '''
+         
+         '''
+    3. 유저 생성
+    4. Devstack 다운로드
+    5. 노드 설정 - Controller Node
+    6. pip 수정
+    7. 설치시작
