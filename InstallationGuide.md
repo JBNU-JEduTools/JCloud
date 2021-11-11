@@ -1,6 +1,7 @@
 # Openstack 설치 가이드(with Devstack)
 devstack을 이용해 Jcloud의 인스턴스(Ubuntu 20.04)에 OpenStack(stable/xena버전)을 설치하는 가이드입니다.
- Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 필요합니다.
+
+Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 필요합니다.
 
 ## 시작하기
 오픈스택을 설치하기 위한 최소 사양 확인하기
