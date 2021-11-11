@@ -30,9 +30,9 @@ Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 
     
 2. Openstack 설치
     1. Prerequirements 설치
-         '''
+         ```
          
-         '''
+         ```
     3. 유저 생성
     4. Devstack 다운로드
     5. 노드 설정 - Controller Node
