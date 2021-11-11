@@ -64,5 +64,21 @@ Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 
          $cd devstack
          $vi local.conf
          ```
+         **local.conf**
+         > [[local|localrc]]
+         > HOST_IP=<IP> # hostname -I 를 통해 얻은 IP
+         > ADMIN_PASSWORD=0000
+         > RABBIT_PASSWORD=0000
+         > SERVICE_PASSWORD=0000
+         > DATABASE_PASSWORD=0000
     9. pip 수정
+         ```
+         $vi inc/python
+         ```
+         > 198번째 라인을 다음과 같이 수정합니다.
+         > from : $cmd_pip $upgrade \
+         > to: $cmd_pip $upgrade $install_test_reqs --ignore-installed \
     10. 설치시작
+         ```
+         $ ./stack.sh
+         ```
