@@ -3,8 +3,7 @@ devstack을 이용해 Jcloud의 인스턴스(Ubuntu 20.04)에 OpenStack(stable/x
 
 Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 필요합니다.
 
-## 시작하기
-오픈스택을 설치하기 위한 최소 사양 확인하기
+## 오픈스택을 설치하기 위한 최소 사양 확인하기
 * Jcloud의 인스턴스에 설치하는 경우 그대로 따라만 하면 문제 없습니다.
 * Controller Node (Core Component)
     * CPU Processor 1-2
@@ -19,7 +18,7 @@ Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 
     * 기타 다른 노드들에 대한 최소 사양도 존재합니다.
     * 오픈스택 최소 사양을 검색해보면 다 다르게 나와서 어떤게 맞는지 모르겠습니다.
 
-
+##
 1. 인스턴스 생성
 이미지
     1. Source 선택
