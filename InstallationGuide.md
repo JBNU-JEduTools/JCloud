@@ -6,7 +6,7 @@ Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 
 ## 오픈스택을 설치하기 위한 최소 사양 확인하기
 * Jcloud의 인스턴스에 설치하는 경우 그대로 따라만 하면 문제 없습니다.
 |Controller Node (Core Component) | Compute Node (Core Component)|
--------------------------------- | -----------------------------
+|-------------------------------- | -----------------------------|
 |    CPU Processor 1-2            | CPU Processor 2-4|
 |    RAM 8GB                      | RAM 8GB|
 |    Storage 100GB                | Storage 100GB|
