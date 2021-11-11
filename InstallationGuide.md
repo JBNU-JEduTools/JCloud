@@ -5,16 +5,13 @@ Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 
 
 ## 오픈스택을 설치하기 위한 최소 사양 확인하기
 * Jcloud의 인스턴스에 설치하는 경우 그대로 따라만 하면 문제 없습니다.
-* Controller Node (Core Component)
-    * CPU Processor 1-2
-    * RAM 8GB
-    * Storage 100GB
-    * NIC 2
-* Compute Node (Core Component)
-    * CPU Processor 2-4
-    * RAM 8GB
-    * Storage 100GB
-    * NIC 2
+Controller Node (Core Component) | Compute Node (Core Component)
+-------------------------------- | -----------------------------
+    CPU Processor 1-2            | CPU Processor 2-4
+    RAM 8GB                      | RAM 8GB
+    Storage 100GB                | Storage 100GB
+    NIC 2                        | NIC 2
+    
 * 기타 다른 노드들에 대한 최소 사양도 존재합니다.
 * 오픈스택 최소 사양을 검색해보면 다 다르게 나와서 어떤게 맞는지 모르겠습니다.
 
@@ -75,9 +72,9 @@ Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 
          ```
          $vi inc/python
          ```
-         > 198번째 라인을 다음과 같이 수정합니다.
-         > from : $cmd_pip $upgrade \
-         > to: $cmd_pip $upgrade $install_test_reqs --ignore-installed \
+         > 198번째 라인을 다음과 같이 수정합니다.  
+         > from : $cmd_pip $upgrade \  
+         > to: $cmd_pip $upgrade $install_test_reqs --ignore-installed \  
     10. 설치시작
          ```
          $ ./stack.sh
