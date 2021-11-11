@@ -19,22 +19,50 @@ Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 
 * 오픈스택 최소 사양을 검색해보면 다 다르게 나와서 어떤게 맞는지 모르겠습니다.
 
 ## 시작하기
-1. 인스턴스 생성
-이미지
-    1. Source 선택
-    이미지
-    2. Flavot 선택
-    이미지
-    3. Network 선택
-    이미지 및 유동 IP 설정
-    
+1. 인스턴스 생성 (이미지를 첨가하면 좋을 것 같습니다.)
+    1. Source 선택 - Ubuntu.20.04.2.ssh7777 (latest)
+    2. Flavot 선택 - devstack.flavor
+    3. Network 선택 - cse-students.network
+    4. 유동 IP 설정
+     
 2. Openstack 설치
     1. Prerequirements 설치
          ```
-         
+         $sudo su - root 
+
+         #apt update
+         #apt upgrade -y
+         #apt purge python3-simplejson -y
+         #apt autoremove -y
+         #apt install python-simplejson -y
+         #apt install python-pip
+         #apt install python-dev
+         #apt install libxml2-dev
+         #apt install libxslt-dev
+         #apt install libffi-dev
+         #apt install libpq-dev
+         #apt install python-openssl
+         #apt install mysql-client
+
+         #reboot
          ```
     3. 유저 생성
-    4. Devstack 다운로드
-    5. 노드 설정 - Controller Node
-    6. pip 수정
-    7. 설치시작
+         ```
+         $sudo useradd -s /bin/bash -d /opt/stack -m stack
+         $echo "stack ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/stack
+         $sudo su - stack
+         ```
+    5. Devstack 다운로드
+         ```
+         $sudo apt install git -y
+         $git clone https://github.com/openstack-dev/devstack.git -b stable/xena
+         $sudo chown -R stack ./devstack
+         $sudo chmod -R 777 devstack
+         ```
+    7. 노드 설정 - Controller Node
+         ```
+         $cd devstack
+         $vi local.conf
+         ```
+    9. pip 수정
+    10. 설치시작
