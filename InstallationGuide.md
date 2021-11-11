@@ -12,7 +12,7 @@ Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 
 |Storage 100GB|Storage 100GB|  
 |NIC 2|NIC 2|  
 
-|제목|내용|
+|Controller Node (Core Component)|Compute Node (Core Component)|
 |------|---|
 |테스트1|테스트2|
 |테스트1|테스트2|
