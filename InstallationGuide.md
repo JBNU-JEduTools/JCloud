@@ -1,5 +1,5 @@
 # Openstack 설치 가이드(with Devstack)
-devstack을 이용해 Jcloud의 인스턴스(Ubuntu 20.04)에 OpenStack(stable/xena버전)을 설치하는 가이드입니다.
+Devstack을 이용해 Jcloud의 인스턴스(Ubuntu 20.04)에 OpenStack(stable/xena버전)을 설치하는 가이드입니다.
 
 Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 필요합니다.
 
@@ -13,14 +13,14 @@ Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 
 |Storage 100GB|Storage 100GB|
 |NIC 2|NIC 2|
     
-* 기타 다른 노드들에 대한 최소 사양도 존재합니다.
-* 오픈스택 최소 사양을 검색해보면 다 다르게 나와서 어떤게 맞는지 모르겠습니다.
+* 기타 다른 노드들에 대한 최소 사양도 존재합니다.  
+* 오픈스택 최소 사양을 검색해보면 다 다르게 나와서 정확히 어떤게 맞는지 모르겠습니다.  
 
-## 시작하기
-1. 인스턴스 생성 (이미지를 첨가하면 좋을 것 같습니다.)
-    1. Source 선택 - Ubuntu.20.04.2.ssh7777 (latest)
-    2. Flavot 선택 - devstack.flavor
-    3. Network 선택 - cse-students.network
+## 시작하기  
+1. 인스턴스 생성 (이미지를 첨가하면 좋을 것 같습니다.)  
+    1. Source 선택 - **Ubuntu.20.04.2.ssh7777 (latest)**  
+    2. Flavot 선택 - **devstack.flavor**  
+    3. Network 선택 - **cse-students.network**  
     4. 유동 IP 설정
      
 2. Openstack 설치
