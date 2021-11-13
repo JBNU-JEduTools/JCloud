@@ -73,8 +73,8 @@ Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 
          ```
          $vi inc/python
          ```
-         > 198번째 라인을 다음과 같이 수정합니다.  
-         > from : $cmd_pip $upgrade \  
+         > 198번째 라인을 다음과 같이 수정합니다. (198입력후 shift + g로 이동)  
+         > from : $cmd_pip $upgrade \  (변경하고자 하는 부분은 버전마다 다를 수 있습니다.)  
          > to: $cmd_pip $upgrade $install_test_reqs --ignore-installed \  
     10. 설치시작
          ```
