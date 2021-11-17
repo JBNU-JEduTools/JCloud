@@ -1,4 +1,4 @@
-# Openstack 설치 가이드(with Devstack)
+# Openstack 설치 가이드(with Devstack in Single VM)
 Devstack을 이용해 Jcloud의 인스턴스(Ubuntu 20.04)에 OpenStack(stable/xena버전)을 설치하는 가이드입니다.  
 Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 필요합니다.  
 인스턴스 생성과 오픈스택 설치 과정에 있어 이미지를 추가해준다면 더 좋을것 같습니다.  
@@ -51,6 +51,15 @@ Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 
 
  #reboot
  ```
+
+**[참고]**
+     
+apt install python-pip 수행 시 아래와 같은 에러가 뜰 수 있습니다.
+     
+<em>``` E: Unable to locate package python-pip ```</em>
+
+python-pip는 2.6절에서 ./stack.sh 수행 시 python-pip 의존성을 자동으로 설치해주기 때문에 생략해도 무방합니다.
+
 ## 2.2 유저 생성
  ```
  $sudo useradd -s /bin/bash -d /opt/stack -m stack
@@ -83,12 +92,19 @@ Ubuntu 버전과 설치하고자 하는 Openstack의 버전에 따라 수정이 
  > 198번째 라인을 다음과 같이 수정합니다. (198입력후 shift + g로 이동)  
  > from : $cmd_pip $upgrade \  (변경하고자 하는 부분은 버전마다 다를 수 있습니다.)  
  > to: $cmd_pip $upgrade $install_test_reqs --ignore-installed \  
+
 ### 2.6 설치시작
+
  ```
  $ ./stack.sh
  ```
+
 ----------------------------
 ## 3. 설치 확인
 * 교내 - 할당받은 유동 IP인 `http://203.254.143.XXX/`로 접속
 * 외부 - `http://203.254.143.217:18XXX/`로 접속  
   XXX는 본인 인스턴스의 주소 마지막 3자리 *ex) 118 -> 18118, 13 -> 18013, 1 -> 18001*
+     
+**[참고]**
+     
+위의 `203.254.143.217` Ip 주소는 JCloud project의 External Gateway 주소입니다. 만약 다른 project의 가상 머신을 사용중이라면 해당 프로젝트의 External Gateway를 입력해주세요.
