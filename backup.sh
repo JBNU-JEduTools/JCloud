@@ -1,20 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Jcloud의 cse-students 프로젝트들의 스냅샷을 백업서버에 전송한다.
 
-readonly PATH_TO_SOURCE_DIR='/home/ubuntu/backup'
-readonly PATH_TO_DESTINATION_DIR='/root/desktop'
-readonly SSH_CLIENT='root@203.254.143.173'
-readonly SSH_PROT=7777
-readonly PROJECT_NAME='demo'
-readonly ACCOUNT_NAME='admin'
-readonly PATH_TO_SNAPSHOT_DIR='/opt/stack/data/glance/images'
-readonly PATH_TO_BACKUP_DIR='/home/ubuntu/backup'
-readonly PATH_TO_PRIVATE_KEY='/home/ubuntu/.ssh/id_rsa'
-readonly PATH_TO_JOBLIST='jobqueue'
-readonly BANDWIDTH_LIMIT=50000
-readonly PATH_TO_REMOTE_BACKUP_DIR='/home/ubuntu/backup_remote'
-readonly TIMELIMIT=3600
+export $(grep -v '^#' .env | xargs)
 
 # 권한 얻기
 source /home/ubuntu/devstack/openrc $ACCOUNT_NAME $PROJECT_NAME
@@ -60,19 +48,19 @@ while [[ -n $(cat $PATH_TO_JOBLIST) ]]; do
     done
     ls -al $PATH_TO_SNAPSHOT_DIR/$snapshot_id
     # 백업 폴더로 이동
-    mkdir -p $PATH_TO_BACKUP_DIR/$PROJECT_NAME/$instance_id/
+    mkdir -p $PATH_TO_SNAPSHOT_WITH_METADATA_DIR/$PROJECT_NAME/$instance_id/
     cp -r $PATH_TO_SNAPSHOT_DIR/$snapshot_id \
-      $PATH_TO_BACKUP_DIR/$PROJECT_NAME/$instance_id/"${timestamp}_${snapshot_id}"
+      $PATH_TO_SNAPSHOT_WITH_METADATA_DIR/$PROJECT_NAME/$instance_id/"${timestamp}_${snapshot_id}"
     # 백업 서버에 전송 use rsync 네트워크 성능제한 필요
     rsync -zarvh \
-      $PATH_TO_SOURCE_DIR \
-      $SSH_CLIENT:$PATH_TO_DESTINATION_DIR \
-      --rsh="ssh -p $SSH_PROT -i $PATH_TO_PRIVATE_KEY" \
+      $PATH_TO_SNAPSHOT_WITH_METADATA_DIR \
+      $USERNAME_REMOTE@$IPADDRESS_REMOTE:$PATH_TO_SNAPSHOT_BACKUP_DIR_REMOTE \
+      --rsh="ssh -p $PORT_REMOTE -i $PATH_TO_PRIVATE_KEY" \
       --bwlimit=$BANDWIDTH_LIMIT \
       --remove-source-files \
       --progress
     # 오래된 백업 삭제, 최신 5개로 유지
-    path_to_snapshot_dir=$PATH_TO_REMOTE_BACKUP_DIR/$PROJECT_NAME/$instance_id
+    path_to_snapshot_dir=$PATH_TO_SNAPSHOT_BACKUP_DIR/$PROJECT_NAME/$instance_id
     snapshot=($(ls $path_to_snapshot_dir))
     for ((i = 0; i < $(($((${#snapshot[@]})) - 5)); i++)); do
       rm $path_to_snapshot_dir/${snapshot[i]}
