@@ -5,7 +5,7 @@
 export $(grep -v '^#' .env | xargs)
 
 # 권한 얻기
-source /home/ubuntu/devstack/openrc $ACCOUNT_NAME $PROJECT_NAME
+source $PATH_TO_OPENRC_FILE $ACCOUNT_NAME $PROJECT_NAME
 
 # 시작시간 기록
 start_time=$(($(date +%s)))
