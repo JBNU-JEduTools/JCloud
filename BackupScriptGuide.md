@@ -29,6 +29,7 @@ jcloud
 | `PATH_TO_SNAPSHOT_BACKUP_DIR_REMOTE`      | 백업 서버에 저장된 스냅샷 폴더의 경로 | '/root/desktop' |
 | `PATH_TO_PRIVATE_KEY`   | 백업 서버에 SSH 접근 할 수 있는 Key 파일의 경로 | '/home/ubuntu/.ssh/id_rsa' |
 | `PATH_TO_OPENRC_FILE`   | 사용자 권한을 얻는 OPENRC 파일의 경로 | '/home/ubuntu/devstack/openrc' |
+| `MAX_COUNT_OF_SNAPSHOT`   | 백업 서버에 저장 될 수 있는 최대 스냅샷의 개수 | 5 |
 | `IPADDRESS_REMOTE`      | 백업 서버의 IP 주소| '203.254.143.173' |
 | `USERNAME_REMOTE`   | 백업 서버의 유저 이름 | 'root' |
 | `PORT_REMOTE`   | 백업 서버에 스냅샷을 전송 할 때 사용하는 포트 번호 | 7777 |
@@ -59,7 +60,7 @@ jcloud
 ### 1. NFS 설정
 #### 1.1 NFS 서버를 위한 패키지 프로그램 설치
 ```
-$apt-get install nfs-common nfs-kernel-server rpcbind portmap
+$ apt-get install nfs-common nfs-kernel-server rpcbind portmap
 ```
 #### 1.2 공유할 폴더 생성
 ```
@@ -71,7 +72,8 @@ $ chmod -R 777 $PATH_TO_SNAPSHOT_BACKUP_DIR_REMOTE
 * 설정 파일은 `/etc/exports` 파일입니다.
 * 아래는 NFS를 걸 폴더는 /mnt/data이고, 203.254.143.192에 대해 다 열겠다는 뜻입니다.
 ```
-$ 203.254.143.192 172.31.0.0/16(rw,sync,no_subtree_check)
+# /etc/exports 파일 예시 
+/mnt/data 203.254.143.192(rw,sync,no_subtree_check)
 ```
 #### 1.4 반영
 ```
@@ -110,10 +112,10 @@ $ ssh-keygen
 ```
 #### 3.2 backup 서버에 키 전송
 ```
-$ssh-copy-id "-p $PORT_REMOTE $USERNAME_REMOTE@$IPADDRESS_REMOTE"
+$ ssh-copy-id "-p $PORT_REMOTE $USERNAME_REMOTE@$IPADDRESS_REMOTE"
 ```
 
-### 4. backup.sh 실행
+## backup.sh 실행
 * 실행 권한을 부여하고 실행합니다.
 ```
 $ chmod +x backup.sh
