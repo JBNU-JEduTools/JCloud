@@ -61,9 +61,11 @@ while [[ -n $(cat $PATH_TO_JOBLIST) ]]; do
       --progress
     # 오래된 백업 삭제, 최신 5개로 유지
     path_to_snapshot_dir=$PATH_TO_SNAPSHOT_BACKUP_DIR/$PROJECT_NAME/$instance_id
-    snapshot=($(ls $path_to_snapshot_dir))
-    for ((i = 0; i < $(($((${#snapshot[@]})) - 5)); i++)); do
-      rm $path_to_snapshot_dir/${snapshot[i]}
+    snapshot_list=($(ls $path_to_snapshot_dir))
+    length_of_snapshot_list=$((${#snapshot_list[@]}))
+    count_of_remove_snapshot=$(($length_of_snapshot_list - $MAX_COUNT_OF_SNAPSHOT))
+    for ((i = 0; i < $count_of_remove_snapshot; i++)); do
+      rm $path_to_snapshot_dir/${snapshot_list[i]}
     done
     #오픈스택 스냅샷 삭제
     openstack image delete $snapshot_id
