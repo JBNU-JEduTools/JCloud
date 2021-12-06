@@ -40,3 +40,18 @@ $vi local.conf
 > MONASCA_METRICS_DB=${MONASCA_METRICS_DB:-influxdb}
 > enable_plugin monasca-api https://opendev.org/openstack/monasca-api stable/wallaby
   
+### 3.설치시작
+ ```
+ $ ./stack.sh
+ ```
+----------------------------
+### 4. 설치 확인
+* 교내 - 할당받은 유동 IP인 `http://203.254.143.XXX/`로 접속
+* 외부 - `http://203.254.143.217:18XXX/`로 접속  
+  XXX는 본인 인스턴스의 주소 마지막 3자리 *ex) 118 -> 18118, 13 -> 18013, 1 -> 18001*
+     
+**[참고]**
+     
+위의 `203.254.143.217` ip 주소는 JCloud project의 External Gateway 주소입니다. 만약 다른 project에서 구축했다면 이 ip 주소를 적절하게 해당 프로젝트의 External Gateway로 바꿔주세요.
+     
+----------------------------
