@@ -85,4 +85,5 @@ systemctl start prometheus
 systemctl enable prometheus
 ```
 3-4 http://localhost:9090 으로 접속하여 확인
+![prometheus_dashboard](https://user-images.githubusercontent.com/91930210/144958941-48b73d8b-23e8-4519-a9ae-ab24663d3dbf.PNG)
 
