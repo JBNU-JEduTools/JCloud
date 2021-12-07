@@ -33,8 +33,14 @@ prometheus metric을 통하여 값이 일정 범위에 도달하면 지정한 em
 ### dashboards
 ### notification
 ### 장점
+- service 단위로 측정하기 때문에 인스턴스를 접근할 필요가 없이 compute node에서 정보를 가져온다
+- alarm설정이 쉽게 구현되어있음
 ### 단점
+- 설치가 매우매우 어려움 (devstack 이 아닌 openstack에서의 설치)
 
+## 결론
+- 현재 Jcloud 상황에서는 학생들의 instance를 접근하기 부담스러우므로 service단위로 데이터를 수집하는 monasca가 더 적합해보임
+- 그러나 Jcloud에 monasca를 설치하기란 매우 어렵고 오래걸리기 때문에 사용자들이 사용을 안하는 방학기간에 맞춰서 진행하는것이 적합해보임
 ## demo 버전
 - prometheus: http://203.254.143.231:9090 (ID: admin / PW: openstack)
 - prometheus + grafana: http://203.254.143.231:3000 (ID: admin / PW: openstack)
