@@ -30,8 +30,8 @@ prometheus metric을 통하여 값이 일정 범위에 도달하면 지정한 em
 문제를 일으키는지 잡아내기 힘들다.
 
 ## monasca
-### dashboards
-### notification
+### dashboards && notification
+![image](https://user-images.githubusercontent.com/91930210/145019139-c9c3e4ed-ddfb-4709-b5ef-a20a90f3952a.png)
 ### 장점
 - service 단위로 측정하기 때문에 인스턴스를 접근할 필요가 없이 compute node에서 정보를 가져온다
 - alarm설정이 쉽게 구현되어있음
