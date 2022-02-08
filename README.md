@@ -1,5 +1,8 @@
 # JCloud monitoring project
 
+## project ppt
+https://www.slideshare.net/secret/uNMYXIVZ4uLDDL
+
 ## installation
 - [prometheus](https://github.com/tlstmdck/jcloud/tree/main/prometheus)
 - [monasca](https://github.com/tlstmdck/jcloud/tree/main/monasca)
