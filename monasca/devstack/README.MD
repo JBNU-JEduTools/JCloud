@@ -1,4 +1,5 @@
 # Monasca installation
+devstack plugin을 통한 자동 설치
 ## 1. requirement
 - OS: ubuntu 18.04LTS(Bionic)
 - CPU: VCPU processor 4개 이상 
