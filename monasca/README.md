@@ -8,7 +8,7 @@
 - openstack: xena
 ## installation
 
-### 사전준비
+## 사전준비
 #### 1. install jdk8 & python
 ```
  $ sudo add-apt-repository ppa:openjdk-r/ppa
@@ -32,7 +32,7 @@ https://drive.google.com/file/d/1XCaG5-SzLAjIXWvG163VfD1XkWpwE75K/view?usp=shari
 $ mysql –u root –p”패스워드” < mon_mysql.sql
 ```
 
-### Apache Kafka & Zookeeper 설치
+## Apache Kafka & Zookeeper 설치
 #### 1. kafka 압축 해제후에 경로지정해줌
 ```
 $ wget https://archive.apache.org/dist/kafka/2.6.0/kafka_2.12-2.6.0.tgz
@@ -81,6 +81,28 @@ $ sudo chown -R kafka. /opt/kafka/logs
 ```
 #### 4. 서비스 파일 작성 및 시작
 ```
+$ sudo vi /etc/systemd/system/kafka.service
+---
+[Unit]
+Description=Kafka
+Requires=network.target
+After=network.target zookeeper.service
+
+[Service]
+User=kafka
+Group=kafka
+LimitNOFILE=32768:32768
+Environment="LOG_DIR=/var/log/kafka"
+Environment="KAFKA_HEAP_OPTS=-Xmx128m"
+ExecStart=/opt/kafka/bin/kafka-server-start.sh /etc/kafka/server.properties
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+```
+$ sudo vi /etc/systemd/system/zookeeper.service
+---
 
 ```
 #### 5. 토픽 생성
@@ -97,10 +119,13 @@ $ /opt/kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replicati
 $ /opt/kafka/bin/kafka-topics.sh --list --zookeeper localhost:2181
 ```
 
-### Apache Storm 설치
+## Apache Storm 설치
 #### 1. storm 다운 및 경로지정
 ```
-$ wget ...
+$ wget https://dlcdn.apache.org/storm/apache-storm-1.2.4/apache-storm-1.2.4.tar.gz
+$ tar zxf apache-storm-1.2.4.tar.gz
+$ mv apache-storm-1.2.4.tar.gz storm
+$ sudo mv storm /opt/
 ```
 #### 2. storm 설정 수정
 ```
@@ -116,13 +141,48 @@ $ sudo chown -R storm. /opt/storm/logs
 ```
 #### 4. storm 서비스 작성 및 시작
 ```
-...
+$ sudo vi /etc/systemd/system/monasca-storm-nimbus.service
+---
+[Unit]
+Description = monasca-storm-nimbus.service
+
+[Service]
+Group = storm
+ExecReload = /bin/kill -HUP $MAINPID
+TimeoutStopSec = 300
+KillMode = process
+ExecStart = /opt/storm/bin/storm nimbus
+User = storm
+
+[Install]
+WantedBy = multi-user.target
 ```
-#### 5. 로그 확인
 ```
-...
+$ sudo vi /etc/systemd/system/monasca-storm-supervisor.service
+---
+[Unit]
+Description = monasca-storm-supervisor.service
+
+[Service]
+Group = storm
+ExecReload = /bin/kill -HUP $MAINPID
+TimeoutStopSec = 300
+KillMode = process
+ExecStart = /opt/storm/current/bin/storm supervisor
+User = storm
+
+[Install]
+WantedBy = multi-user.target                            
 ```
-### InfluxDB 설치
+```
+$ sudo systemctl start monasca-storm-nimbus
+$ sudo systemctl start monasca-storm-supervisor
+```
+#### 5. 확인
+```
+$ ps -aux | grep storm
+```
+## InfluxDB 설치
 #### 1. InfluxDB repository 등록
 ```
 $ sudo apt-get update
@@ -150,7 +210,7 @@ InfluxDB shell version: 1.3.1
 > quit
    # Alarm 관련 정보를 관리하기 위한 데이터베이스 생성 및 관리자 정보 등록
 ```
-### Monasca Persister 설치
+## Monasca Persister 설치
 #### 1. Monasca Persister 설치
 ```
 $ sudo pip install --upgrade pbr
@@ -227,7 +287,25 @@ port = 8086
 user = monasca                                 
 password = password 
 ```
-### Monasca Common 설치
+#### 3. 서비스 등록 및 시작
+```
+$ sudo vi /etc/systemd/system/monasca-persister.service
+---
+[Service]
+ExecReload = /bin/kill -HUP $MAINPID
+TimeoutStopSec = 300
+KillMode = process
+ExecStart = /usr/local/bin/monasca-persister --config-file=/etc/monasca/monasca-persister.conf
+User = stack
+Restart = on-failure
+
+[Unit]
+Description = monasca-persister.service
+
+[Install]
+WantedBy = multi-user.target
+```
+## Monasca Common 설치
 #### 1. monasca common 다운로드
 ```
 $ git clone -b stable/xena https://github.com/openstack/monasca-common
@@ -243,7 +321,7 @@ $ cd java
 $ mvn clean install
 ```
 SNAPSHOT 버전 확인 및 기억
-### Monasca Thresh 설치
+## Monasca Thresh 설치
 #### 1. monasca thresh 다운로드
 ```
 $ git clone -b stable/xena https://github.com/openstack/monasca-thresh
@@ -408,13 +486,57 @@ $ mv monasca-thresh.jar /etc/monasca/
 ```
 #### 5. 서비스 스크립트 생성 및 시작
 ```
-...
+$ sudo vi /etc/init.d/monasca-thresh
+---
+case "$1" in
+    start)
+      $0 status
+      if [ $? -ne 0 ]; then
+        sudo -Hu stack /opt/storm/bin/storm jar /etc/monasca/monasca-thresh.jar monasca.thresh.ThresholdingEngine /etc/monasca/thresh-config.yml thresh-cluster
+        exit $?
+      else
+        echo "monasca-thresh is already running"
+        exit 0
+      fi
+    ;;
+    stop)
+      # On system shutdown storm is being shutdown also and this will hang so skip shutting down thresh in that case
+      if [ -e '/sbin/runlevel' ]; then  # upstart/sysV case
+        if [ $(runlevel | cut -d\  -f 2) == 0 ]; then
+          exit 0
+        fi
+      else  # systemd case
+        systemctl list-units --type=target |grep shutdown.target
+        if [ $? -eq 0 ]; then
+          exit 0
+        fi
+      fi
+      sudo -Hu stack /opt/storm/bin/storm kill thresh-cluster
+      # The above command returns but actually takes awhile loop watching status
+      while true; do
+        sudo -Hu stack /opt/storm/bin/storm list |grep thresh-cluster
+        if [ $? -ne 0 ]; then break; fi
+        sleep 1
+      done
+    ;;
+    status)
+        sudo -Hu stack /opt/storm/bin/storm list |grep thresh-cluster
+    ;;
+    restart)
+      $0 stop
+      $0 start
+    ;;
+esac
+```
+```
+$ sudo update-rc.d monasca-thresh defaults
+$ sudo service monasca-thresh start
 ```
 #### 6. 로그 확인
 ```
 $ ps -ef |grep thresh
 ```
-### Monasca Notification 설치
+## Monasca Notification 설치
 #### 1. monasca notification 다운로드 및 dependencies 설치
 ```
 $ git clone https://github.com/openstack/monasca-notification.git -b stable/xena
@@ -470,13 +592,26 @@ $ sudo chown -R monasca. /var/log/monasca/notification
 ```
 #### 4. 서비스 스크립트 생성 및 시작
 ```
-...
+$ sudo vi /etc/systemd/system/monasca-notification.service
+[Unit]
+Description = monasca-notification.service
+
+[Service]
+ExecReload = /bin/kill -HUP $MAINPID
+TimeoutStopSec = 300
+KillMode = process
+ExecStart = /usr/local/bin/monasca-notification
+User = stack
+
+[Install]
+WantedBy = multi-user.target
+
 ```
 #### 5. 확인
 ```
 $ ps -ef |grep notification
 ```
-### Monasca API 설치
+## Monasca API 설치
 #### 1. monasca api 다운로드
 ```
 $ git clone -b stable/xena https://github.com/openstack/monasca-api
@@ -579,12 +714,32 @@ ProxyPass "/metrics" "unix:/var/run/uwsgi/monasca-api-wsgi.socket|uwsgi://uwsgi-
 ```
 #### 6. 서비스 스크립트 생성 및 시작
 ```
-...
+$ vi /etc/systemd/system/monasca-api.service
+[Unit]
+Description = Devstack monasca-api.service
+
+[Service]
+RestartForceExitStatus = 100
+NotifyAccess = all
+Restart = always
+KillMode = process
+Type = notify
+ExecReload = /bin/kill -HUP $MAINPID
+ExecStart = /usr/local/bin/uwsgi --ini /etc/monasca/api-uwsgi.ini
+User = stack
+SyslogIdentifier = monasca-api.service
+
+[Install]
+WantedBy = multi-user.target
+
+```
+```
+$ sudo systemctl start monasca-api
 ```
 #### 7. 확인
 ```
 $ ps -aux | grep monasca
 ```
-### Monasca UI 설치
+## Monasca UI 설치
 
-### Monasca Agent 설치
+## Monasca Agent 설치
