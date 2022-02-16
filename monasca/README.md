@@ -13,15 +13,18 @@
 ```
  $ sudo add-apt-repository ppa:openjdk-r/ppa
  $ sudo apt-get update
- $ sudo apt-get install openjdk-8-jdk python-pip python-dev
+ $ sudo apt-get install openjdk-8-jdk python3-pip python3-dev
+ $ sudo apt-get install -y python-setuptools
 ```
 #### 2. install Maven
 ```
- $ sudo apt-get install maven
+ $ sudo apt-get install -y maven
 ```
 #### 3. install uwsgi
 ```
-$ pip install uwsgi
+$ sudo apt install uwsgi
+$ sudo pip install uwsgi
+$ sudo a2enmod proxy_http
 ```
 #### 4. mon쿼리 db 등록
 
@@ -31,7 +34,7 @@ https://drive.google.com/file/d/1XCaG5-SzLAjIXWvG163VfD1XkWpwE75K/view?usp=shari
 ```
 $ mysql –u root –p”패스워드” < mon_mysql.sql
 ```
-
+mysql 버전문제로 쿼리가 안먹히면 쿼리문 일일이 버전에 맞게 변경 후 쳐줘야함
 ## Apache Kafka & Zookeeper 설치
 #### 1. kafka 압축 해제후에 경로지정해줌
 ```
@@ -42,34 +45,13 @@ $ sudo mv kafka /opt/
 ```
 #### 2. kafka 설정
 ```
-$ vi /etc/kafka/server.properties
+$ sudo vi /opt/kafka/config/server.properties
 ---
 ############################# Server Basics #############################
 broker.id=0
 log.dirs=/opt/kafka/logs
 ############################# Socket Server Settings #############################
-num.network.threads=3
-num.io.threads=8
-socket.send.buffer.bytes=102400
-socket.receive.buffer.bytes=102400
-socket.request.max.bytes=104857600
-############################# Log Basics #############################
-log.dirs=/tmp/kafka-logs
-num.partitions=1
-num.recovery.threads.per.data.dir=1
-############################# Internal Topic Settings  #############################
-offsets.topic.replication.factor=1
-transaction.state.log.replication.factor=1
-transaction.state.log.min.isr=1
-############################# Log Retention Policy #############################
-log.retention.hours=168
-log.segment.bytes=1073741824
-log.retention.check.interval.ms=300000
-############################# Zookeeper #############################
-zookeeper.connect=localhost:2181
-zookeeper.connection.timeout.ms=18000
-############################# Group Coordinator Settings #############################
-group.initial.rebalance.delay.ms=0
+advertised.listeners=PLAINTEXT://localhost:9092
 ```
 #### 3. 권한 및 사용자 추가
 ```
@@ -84,26 +66,39 @@ $ sudo chown -R kafka. /opt/kafka/logs
 $ sudo vi /etc/systemd/system/kafka.service
 ---
 [Unit]
-Description=Kafka
+Description=kafka-server
+After=zookeeper.service
+
+[Service]
+Type=simple
+User=kafka
+Group=kafka
+SyslogIdentifier=kafka-server
+WorkingDirectory=/opt/kafka
+Restart=no
+RestartSec=0s
+ExecStart=/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
+ExecStop=/opt/kafka/bin/kafka-server-stop.sh
+```
+```
+$ sudo vi /etc/systemd/system/zookeeper.service
+---
+[Unit]
+Description=Zookeeper
 Requires=network.target
-After=network.target zookeeper.service
 
 [Service]
 User=kafka
 Group=kafka
-LimitNOFILE=32768:32768
-Environment="LOG_DIR=/var/log/kafka"
-Environment="KAFKA_HEAP_OPTS=-Xmx128m"
-ExecStart=/opt/kafka/bin/kafka-server-start.sh /etc/kafka/server.properties
+ExecStart=/opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties
 Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
 ```
 ```
-$ sudo vi /etc/systemd/system/zookeeper.service
----
-
+$ sudo service start kafka
+$ sudo service start zookeeper
 ```
 #### 5. 토픽 생성
 ```
@@ -130,6 +125,39 @@ $ sudo mv storm /opt/
 #### 2. storm 설정 수정
 ```
 $ sudo vi /opt/storm/conf/storm.yaml
+---
+### base
+java.library.path: "/usr/local/lib:/opt/local/lib:/usr/lib"
+storm.local.dir: "/var/storm"
+########### These MUST be filled in for a storm configuration
+### zookeeper
+storm.zookeeper.servers:
+    - "127.0.0.1"
+storm.zookeeper.port: 2181
+storm.zookeeper.retry.interval: 5000
+storm.zookeeper.retry.times: 60
+storm.zookeeper.root: /storm
+storm.zookeeper.session.timeout: 3000
+
+### supervisor      
+supervisor.slots.ports:
+    - 6701
+    - 6702
+
+### nimbus 
+nimbus.seeds: ["127.0.0.1"]
+nimbus.thrift.port: 6627
+nimbus.childopts: -Xmx256m
+
+### ui
+ui.host: 10.0.0.27
+ui.port: 8089
+ui.childopts: -Xmx768m
+
+### logviewer
+logviewer.port: 8090
+logviewer.childopts: -Xmx128m
+# ##### These may optionally be filled in:
 ```
 #### 3. 권한 및 사용자 추가
 ```
@@ -168,7 +196,7 @@ Group = storm
 ExecReload = /bin/kill -HUP $MAINPID
 TimeoutStopSec = 300
 KillMode = process
-ExecStart = /opt/storm/current/bin/storm supervisor
+ExecStart = /opt/storm/bin/storm supervisor
 User = storm
 
 [Install]
@@ -207,6 +235,7 @@ InfluxDB shell version: 1.3.1
 > CREATE DATABASE mon
 > CREATE USER monasca WITH PASSWORD 'password'
 > CREATE RETENTION POLICY persister_all ON mon DURATION 90d REPLICATION 1 DEFAULT
+> show databases
 > quit
    # Alarm 관련 정보를 관리하기 위한 데이터베이스 생성 및 관리자 정보 등록
 ```
@@ -218,8 +247,20 @@ $ sudo pip install influxdb
 $ git clone https://opendev.org/openstack/monasca-persister.git -b stable/xena
 $ pip install -c https://releases.openstack.org/constraints/upper/xena -e ./monasca-persister
 ```
+#### 2. persister 사용자 정보 및 디렉토리 등록
+```
+$ sudo groupadd --system monasca
+$ sudo useradd --system --gid monasca monasca
+$ sudo mkdir -p /var/lib/monasca-persister
+$ sudo mkdir -p /var/log/monasca/persister
+$ sudo chown monasca:monasca /var/lib/monasca-persister
+$ sudo chown monasca:monasca /var/log/monasca/persister
+$ sudo chown root:monasca /etc/monasca/persister.conf
+$ sudo chmod 640 /etc/monasca/persister.conf
+```
 #### 2. configuration 파일 생성
 ```
+$ sudo mkdir /etc/monasca
 $ sudo vi /etc/monasca/persister.conf
 [DEFAULT]
 debug = True
@@ -295,8 +336,8 @@ $ sudo vi /etc/systemd/system/monasca-persister.service
 ExecReload = /bin/kill -HUP $MAINPID
 TimeoutStopSec = 300
 KillMode = process
-ExecStart = /usr/local/bin/monasca-persister --config-file=/etc/monasca/monasca-persister.conf
-User = stack
+ExecStart = %{계정 홈 디렉토리 위치}/.local/bin/monasca-persister --config-file=/etc/monasca/persister.conf
+User = ubuntu
 Restart = on-failure
 
 [Unit]
@@ -304,6 +345,9 @@ Description = monasca-persister.service
 
 [Install]
 WantedBy = multi-user.target
+```
+```
+$ sudo systemctl start monasca-persister
 ```
 ## Monasca Common 설치
 #### 1. monasca common 다운로드
@@ -482,12 +526,40 @@ database:
 ```
 $ sudo mv thresh-config.yml /etc/monasca/
 $ cd ..
-$ mv monasca-thresh.jar /etc/monasca/
+$ sudo mv monasca-thresh.jar /etc/monasca/
 ```
 #### 5. 서비스 스크립트 생성 및 시작
 ```
 $ sudo vi /etc/init.d/monasca-thresh
 ---
+#!/bin/bash
+#
+# (C) Copyright 2015 Hewlett Packard Enterprise Development Company LP
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+### BEGIN INIT INFO
+# Provides:          monasca-thresh
+# Required-Start:    $nimbus
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:
+# Short-Description: Monitoring threshold engine running under storm
+# Description:
+### END INIT INFO
+
 case "$1" in
     start)
       $0 status
@@ -529,6 +601,7 @@ case "$1" in
 esac
 ```
 ```
+$ sudo chmod 755 /etc/init.d/monasca-thresh
 $ sudo update-rc.d monasca-thresh defaults
 $ sudo service monasca-thresh start
 ```
@@ -545,6 +618,7 @@ $ cd monasca-notification
 ```
 #### 2. monasca notificatioin 설정 파일 생성
 ```
+$ sudo apt install tox
 $ tox -e genconfig
 $ sudo mv etc/monasca/notification.conf.sample /etc/monasca/notification.conf
 $ sudo vi /etc/monasca/notification.conf
@@ -600,12 +674,15 @@ Description = monasca-notification.service
 ExecReload = /bin/kill -HUP $MAINPID
 TimeoutStopSec = 300
 KillMode = process
-ExecStart = /usr/local/bin/monasca-notification
+ExecStart = /usr/local/bin/monasca-notification --config-file /etc/monasca/notification.conf
 User = stack
 
 [Install]
 WantedBy = multi-user.target
-
+```
+```
+$ pip install monasca-notification
+$ sudo systemctl start monasca-notification
 ```
 #### 5. 확인
 ```
@@ -671,7 +748,7 @@ default_authorized_roles = admin, monasca-user
 ```
 #### 4. api uwsgi 설정
 ```
-$ sudo vi api-uwsgi.ini
+$ sudo vi /etc/monasca/api-uwsgi.ini
 ---
 [uwsgi]
 wsgi-file = /usr/local/bin/monasca-api-wsgi
@@ -706,15 +783,13 @@ socket = /var/run/uwsgi/monasca-api-wsgi.socket
 #### 5. site-enabled에 monasca api 등록
 ```
 $ cd /etc/apache2/sites-enabled
-$ vi monasca-api-wsgi.conf
+$ sudo vi monasca-api-wsgi.conf
 ---
-ProxyPass "/metrics" "unix:/var/run/uwsgi/monasca-api-wsgi.socket|uwsgi://uwsgi-uds-monasca-api-wsgi" retry=0
-ProxyPass "/metrics" "unix:/var/run/uwsgi/monasca-api-wsgi.socket|uwsgi://uwsgi-uds-monasca-api-wsgi" retry=0
 ProxyPass "/metrics" "unix:/var/run/uwsgi/monasca-api-wsgi.socket|uwsgi://uwsgi-uds-monasca-api-wsgi" retry=0
 ```
 #### 6. 서비스 스크립트 생성 및 시작
 ```
-$ vi /etc/systemd/system/monasca-api.service
+$ sudo vi /etc/systemd/system/monasca-api.service
 [Unit]
 Description = Devstack monasca-api.service
 
@@ -733,13 +808,34 @@ SyslogIdentifier = monasca-api.service
 WantedBy = multi-user.target
 
 ```
+/etc/apache2/mods-enabled 에 proxy_uwsgi.load 가 없을 경우 
 ```
+$ ln -s /etc/apache2/mods-available/proxy_uwsgi.load /etc/apache2/mods-enabled/proxy_uwsgi.load
+```
+```
+$ sudo pip install falcon
+$ sudo pip install confluent_kafka
+$ sudo pip install kazoo
+$ sudo mkdir /var/log/monasca/api
 $ sudo systemctl start monasca-api
 ```
 #### 7. 확인
 ```
 $ ps -aux | grep monasca
 ```
+#### 8. openstack service 생성
+```
+$ openstack service create --name monasca --description "monitoring service" monitoring
+```
+#### 8. openstack endpoint 생성
+```
+$ openstack endpoint create --region RegionOne monasca public http://10.0.0.150/metrics/v2.0
+$ openstack endpoint create --region RegionOne monasca internal http://10.0.0.150/metrics/v2.0
+$ openstack endpoint create --region RegionOne monasca admin http://10.0.0.150/metrics/v2.0
+```
 ## Monasca UI 설치
+```
+
+```
 
 ## Monasca Agent 설치
