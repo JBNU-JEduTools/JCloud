@@ -834,8 +834,36 @@ $ openstack endpoint create --region RegionOne monasca internal http://10.0.0.15
 $ openstack endpoint create --region RegionOne monasca admin http://10.0.0.150/metrics/v2.0
 ```
 ## Monasca UI 설치
+#### 1. ui 다운로드 및 pip 설치
 ```
+$ git clone -b stable/xena https://github.com/openstack/monasca-ui.git
+$ cd monasca-ui 
+$ pip install -r requirements.txt
+$ pip install monasca-ui
+$ sudo apt install python3-monascaclient
+```
+#### 2. horizon에 링크 생성
+```
+$ sudo ln -f "${MONASCA_UI_DIR}/monitoring/enabled/_50_admin_add_monitoring_panel.py" "${HORIZON_DIR}/openstack_dashboard/local/enabled/_50_admin_add_monitoring_panel.py"
+$ sudo ln -f "${MONASCA_UI_DIR}/monitoring/conf/monitoring_policy.yaml" "${HORIZON_DIR}/openstack_dashboard/conf/monitoring_policy.yaml"
+$ sudo ln -sfF "${MONASCA_UI_DIR}"/monitoring "${HORIZON_DIR}/monitoring"
+```
+#### 3. monasca ui 설정
+```
+$ sudo cp $MONASCA_UI_DIR/monitoring/config/local_settings.py $HORIZON_DIR/openstack_dashboard/local/local_settings.d/_50_monasca_ui_settings.py
+$ sudo vi ${HORIZON_DIR}/openstack_dashboard/conf/monitoring_policy.yaml
+---
 
+"monasca_user_role": "role:admin"
+"default": "@"
+"monitoring:monitoring": "rule:monasca_user_role"
+"monitoring:kibana_access": "rule:monasca_user_role"
+```
+#### 4. 컴파일 및 실행
+```
+$ sudo DJANGO_SETTINGS_MODULE=openstack_dashboard.settings python3 /var/www/horizon/manage.py collectstatic --noinput
+$ sudo DJANGO_SETTINGS_MODULE=openstack_dashboard.settings python3 /var/www/horizon/manage.py compress --force
+$ sudo service apache2 restart
 ```
 
 ## Monasca Agent 설치
