@@ -1,8 +1,7 @@
 # JCloud monitoring project
 
-## project ppt
-https://www.slideshare.net/secret/uNMYXIVZ4uLDDL
-
+## 논문
+[오픈스택 환경에서의 실시간 오픈소스 모니터링 시스템 비교분석](https://github.com/tlstmdck/jcloud/blob/main/%EC%98%A4%ED%94%88%EC%8A%A4%ED%83%9D%20%ED%99%98%EA%B2%BD%EC%97%90%EC%84%9C%EC%9D%98%20%EC%8B%A4%EC%8B%9C%EA%B0%84%20%EC%98%A4%ED%94%88%EC%86%8C%EC%8A%A4%20%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81%20%EC%8B%9C%EC%8A%A4%ED%85%9C%20%EB%B9%84%EA%B5%90%EB%B6%84%EC%84%9D.pdf)
 ## installation
 - [prometheus](https://github.com/tlstmdck/jcloud/tree/main/prometheus)
 - [monasca](https://github.com/tlstmdck/jcloud/tree/main/monasca)
